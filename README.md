@@ -1,4 +1,4 @@
-# useful_scripts
+# Introduction
 A repository to share our useful scripts in, between our group and others.
 
 ## Structure
