@@ -8,3 +8,4 @@ Each member who would like to add some useful scripts here can start a new direc
 The following scripts I have added:
 * [extract clusters](Fawaz/extract_clusters.py) that extract clusters produced from `mmseqs2` clustering into separate fasta file, i.e. each cluster is in a separate fasta file
 * [separate proteins](Fawaz/separate_proteins.py) that extract all proteins in annotation files given into one big fasta file, the proteins separated will be named according to the original annotation file they came from, the gene/protein name/id and the coordinates.
+* [PDB to graph](Ilya/pdb_to_pyg.py) that takes either single pdb file or a batch and converts them to torch_geometric.data.Data-like dictionary. Output will always be a pickle file containing either a single dict or a pandas DataFrame of them.
