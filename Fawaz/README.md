@@ -4,3 +4,6 @@ Internally, it's simply a Protein class that stores important information about 
 
 ## Extract Clusters
 This scripts is dedicated to separate clusters into individual FASTA files from `mmseqs2` output. It takes as input a list of cluster names txt file, where each cluster name is in one line, so just the unique cluster names that one can get from the TSV file produces with cluster names, then it takes the `mmseqs2` fasta output with all sequences and output directory. The script will only output the clusters in the txt file, so if the user only wants to output certain clusters as a separate FASTA file, can only include those cluseter names in the txt file.
+
+## Fasta and Fastq Stats
+Simple bash script that takes one arguemnt with the following allowed extentions (.fasta, .fa, .fastq, .fq) with or without .gz at the end, and number of reads, total length (sum of all reads), and average length of reads in the file
