@@ -6,7 +6,6 @@ import os
 from urllib.request import urlretrieve
 from Bio.PDB import Select, PDBIO
 from Bio.PDB.PDBParser import PDBParser
-import traceback
 
 
 class ChainSelect(Select):
@@ -55,10 +54,12 @@ def run_single(data, file_name, output_dir, time, only_post=False):
     try:
         name = os.path.basename(file_name).split(".")[0]
         if not only_post:
-            subprocess.run(["run_alphafold.sh", "-d", data, "-f", file_name, "-o", os.path.join(output_dir, "tmp"), "-t", time, "-g", "False"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(
+                ["run_alphafold.sh", "-d", data, "-f", file_name, "-o", os.path.join(output_dir, "tmp"), "-t", time,
+                 "-g", "False"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         postprocess(output_dir, name)
     except Exception as e:
-        print(file_name, "->",e)
+        print(file_name, "->", e)
 
 
 def main():
@@ -75,10 +76,8 @@ def main():
     for i in range(len(tasks)):
         tasks[i].get()
         print("Collect process", i)
-    # os.rmdir(os.path.join(output_dir, "tmp"))
     print("Finished")
 
 
 if __name__ == "__main__":
     main()
-
