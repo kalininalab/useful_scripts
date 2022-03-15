@@ -22,6 +22,7 @@ The following scripts I have added:
 
 ### Ilya
 * [PDB to graph](Ilya/pdb_to_pyg.py) that takes either single pdb file or a batch and converts them to torch_geometric.data.Data-like dictionary. Output will always be a pickle file containing either a single dict or a pandas DataFrame of them.
+* [PDB to fasta](Ilya/pdb_to_fasta.py) that takes a directory of pdb files and puts all their sequences into a single fasta file.
 
 ### Roman
 
