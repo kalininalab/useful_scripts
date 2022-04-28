@@ -7,3 +7,6 @@ This scripts is dedicated to separate clusters into individual FASTA files from 
 
 ## Fasta and Fastq Stats
 Simple bash script that takes one arguemnt with the following allowed extentions (.fasta, .fa, .fastq, .fq) with or without .gz at the end, and number of reads, total length (sum of all reads), and average length of reads in the file
+
+## Extract protein from PATRIC data
+A simple python script that takes 3 arguments, a fasta file with assembly from the patric database, the PATRIC.features.tab file corresponding to that assembly, and a FiGfam id (e.g. 	FIG00000080), then it goes through the table, find the entries for that protein, checks the contig, start, strop, and strand then extracts it properly from the assembly as amino acid sequences

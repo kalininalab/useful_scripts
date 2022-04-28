@@ -19,9 +19,11 @@ The following scripts I have added:
 * [extract clusters](Fawaz/extract_clusters.py) that extract clusters produced from `mmseqs2` clustering into separate fasta file, i.e. each cluster is in a separate fasta file
 * [separate proteins](Fawaz/separate_proteins.py) that extract all proteins in annotation files given into one big fasta file, the proteins separated will be named according to the original annotation file they came from, the gene/protein name/id and the coordinates.
 * [fasta fastq stats](Fawaz/fasta_fastq_stats.sh) this is a very simple (kinda hacky) bash script that counts the number of reads in a fasta or fastq file (can also be gzipped), and the average length of the reads and the total number of sequences in that file
+* [extract protein from patric data](Fawaz/extract_patric_protein.py) this script takes a patric assembly and patric tab annotation and a FIGfamily id (e.g. FIG00000080) and extracts the amino acid sequence corresponding to that gene if it exists in the .tab file given for that specific strain
 
 ### Ilya
 * [PDB to graph](Ilya/pdb_to_pyg.py) that takes either single pdb file or a batch and converts them to torch_geometric.data.Data-like dictionary. Output will always be a pickle file containing either a single dict or a pandas DataFrame of them.
+* [PDB to fasta](Ilya/pdb_to_fasta.py) that takes a directory of pdb files and puts all their sequences into a single fasta file.
 
 ### Roman
 
