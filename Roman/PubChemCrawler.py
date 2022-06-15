@@ -1,9 +1,10 @@
 import os.path
-
+import sys
 from rdkit import Chem
 from rdkit.Chem import PandasTools
-from rdkit.Chem.rdmolops import AddHs
+from rdkit.Chem.rdmolops import AddHs, GetAdjacencyMatrix
 import pandas as pd
+import numpy as np
 import urllib.request
 import gzip
 import shutil
@@ -49,30 +50,42 @@ def filtering(reads, output=None):
         print(f"\r{i:6}/500000", end="")
         try:
             count += 1
+
             if "+" in smiles or "-" in smiles or "." in smiles:
                 continue
+
             mol = Chem.MolFromSmiles(smiles)
-            stats = {
-                "ccount":sum([a.GetAtomicNum() == 6 for a in mol.GetAtoms()]),
-                "ocount":sum([a.GetAtomicNum() == 8 for a in mol.GetAtoms()]),
-                "rcount":sum([a.GetAtomicNum() not in [6, 8] for a in mol.GetAtoms()]),
-                "rings": mol.GetRingInfo().AtomRings(),
-            }
-            if not (stats["ccount"] <
-            if len(stats["rings"]) > 0:
-                stats["ring_atoms"] = [mol.GetAtomWithIdx(idx).GetAtomicNum() for idx in stats["rings"][0]]
-                stats["ring_bonds"] = sum([
-                    b.GetBondType() == Chem.rdchem.BondType.SINGLE for b in mol.GetBonds()
-                    if b.GetBeginAtomIdx() in stats["rings"][0] and b.GetEndAtomIdx() in stats["rings"][0]
-                ]),
-            if all(5 <= len(r) <= 6 for r in stats["ring_atoms"]) \
-                    and all(stats["ring_atoms"]) == stats["ring_bonds"][0] \
-                    and sum([x == 8 for x in stats["ring_atoms"]]) == 1 \
-                    and sum([x == 6 for x in stats["ring_atoms"]]) == len(stats["ring_atoms"]) - 1:
-                passed += 1
-                print(cid, "\t", smiles, file=output)  # , "|", Chem.rdmolops.GetFormalCharge(mol))
-        except Exception:
-            pass
+            ccount = sum([a.GetAtomicNum() == 6 for a in mol.GetAtoms()])
+            ocount = sum([a.GetAtomicNum() == 8 for a in mol.GetAtoms()])
+            rcount = sum([a.GetAtomicNum() not in [6, 8] for a in mol.GetAtoms()])
+            rings = mol.GetRingInfo().AtomRings()
+            tmp = [l for sublist in rings for l in sublist]
+
+            if not (
+                ccount * 0.5 < ocount < ccount * 2
+                and (ccount + ocount) / 4 > rcount
+                and len(rings) > 0
+                and all([len(r) in [5, 6] for r in rings])
+                and all([sum(mol.GetAtomWithIdx(a).GetAtomicNum() == 8 for a in r) == 1 for r in rings])
+                and all([sum(mol.GetAtomWithIdx(a).GetAtomicNum() == 6 for a in r) == (len(r) - 1) for r in rings])
+                and len(set(tmp)) == len(tmp)
+            ):
+                continue
+
+            adj = np.array(GetAdjacencyMatrix(mol))
+            adj_2 = np.linalg.matrix_power(adj, 2)
+            adj_5 = np.linalg.matrix_power(adj, 5)
+            tmp = set(tmp)
+
+            if not (
+                all([len(set(np.nonzero(adj_5[:, a.GetIdx()])[0].flatten()).intersection(tmp)) != 0 for a in mol.GetAtoms()])
+            ):
+                continue
+
+            passed += 1
+            print(cid, "\t", smiles, file=output)
+        except Exception as e:
+            raise e
     print(f"{passed}/{count}: {passed / count:.5}", file=output)
 
 
@@ -87,8 +100,8 @@ def next_file(num, log_file=None):
 
 def main():
     log_file = open("log.txt", "w")
-    i = 1_000_000
-    while i < 163000001:
+    i = 0
+    while i < 163_000_001:
         try:
             next_file(i)
         except Exception as e:
@@ -98,6 +111,8 @@ def main():
 
 
 if __name__ == '__main__':
+    # convert("PubChem_compound_polymer.sdf")
+    # filtering(read("PubChem_compound_polymer.csv"), open("./result.tsv", "w"))
     main()
 
     # filename = "PubChem_compound_text_aspirin_records"
