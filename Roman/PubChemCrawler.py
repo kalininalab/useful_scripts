@@ -95,7 +95,7 @@ def next_file(num, log_file=None):
         print("Convert SDF to CSV ...", file=log_file)
         convert(filename)
         print("\tConversion completed", file=log_file)
-    filtering(read(f"{filename[:-3]}csv"), output=open("./result.tsv", "a"))
+    filtering(read(f"{filename[:-3]}csv"), output=open("./result_poly.tsv", "a"))
 
 
 def main():

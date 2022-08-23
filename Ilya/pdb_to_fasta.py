@@ -1,4 +1,6 @@
 import os
+import sys
+
 
 threetoone = {
     "CYS": "C",
@@ -52,6 +54,4 @@ def run(pdb_dir: str, output: str) -> None:
 
 
 if __name__ == "__main__":
-    from jsonargparse import CLI
-
-    CLI(run)
+    run(*sys.argv[1:])
