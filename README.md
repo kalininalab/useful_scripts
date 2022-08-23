@@ -27,4 +27,8 @@ The following scripts I have added:
 
 ### Roman
 
+* [MultiFold](Roman/run_multifold.py) run alphafold in parallel for multiple sequences.
+* [Chain from PDB](Roman/chain.py) extract a specific chain from a PDB file.
+* [Crawl PubChem](Roman/pubchem_crawler.py) Download and scan all compounds in the PubChem database
+
 See the [README](Roman/README.md) for detailed explanations
