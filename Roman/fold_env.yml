@@ -1,4 +1,4 @@
-name: openfold_venv
+name: fold
 channels:
   - pytorch
   - bioconda
@@ -116,4 +116,3 @@ dependencies:
     - werkzeug==2.2.1
     - yarl==1.8.1
     - zipp==3.8.1
-prefix: /home/rjo21/anaconda3/envs/openfold_venv
