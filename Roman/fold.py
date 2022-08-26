@@ -2,17 +2,33 @@ import os
 from os.path import join as pj, abspath as ap
 import shutil
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from typing import Tuple, List
 
 from git import Repo
 
 
-def error(msg):
+def error(msg: str) -> None:
+    """
+    Print an error message and abort the program.
+
+    Args:
+        msg: The error message to print.
+    """
     print(msg)
     exit(1)
 
 
-def read_fasta(r_filename):
+def read_fasta(r_filename: str) -> List[Tuple[str, str]]:
+    """
+    Read a fasta file into a list of pairs of sequence head and their actual amino acid sequence.
+
+    Args:
+        r_filename: Filename of the fasta file to be read in
+
+    Return:
+        List of tuples of sequence heads and amino acid sequences
+    """
     with open(r_filename, "r") as r_fasta:
         r_seqs = []
         r_head = ""
@@ -25,7 +41,8 @@ def read_fasta(r_filename):
     return r_seqs
 
 
-def parse_args():
+def parse_args() -> Namespace:
+    """Parse the arguments"""
     parser = ArgumentParser(
         description="With this script you can easily install and run AlphaFold2, OpenFold (fast, PyTorch-based AF2), "
                     "and OmegaFold (db-free AF2) on input aminoacid sequences to compute their folding. So far, only "
@@ -102,15 +119,20 @@ def parse_args():
     return parser.parse_args(sys.argv[1:])
 
 
+# parse the arguments
 args = parse_args()
 
+# If an initialization folder is provided,
 if args.init != "":
-    os.makedirs(args.init, exist_ok=True)
     af_weights_dir = pj(args.init, "weights", "alphafold")
     of_weights_dir = pj(args.init, "weights", "openfold")
     mf_weights_dir = pj(args.init, "weights", "omegafold")
 
     if len(os.listdir(args.init)) == 0:
+        # create the folder if not exists
+        os.makedirs(args.init, exist_ok=True)
+
+        # Clone the repositories for OpenFold and OmegaFold
         # TODO: make this clean in own repo with copied/forked repos to keep everything working in case of later commits
         Repo.clone_from("https://github.com/aqlaboratory/openfold", pj(args.init, "openfold"))
         os.system(
@@ -121,23 +143,26 @@ if args.init != "":
         )
         Repo.clone_from("https://github.com/HeliXonProtein/OmegaFold.git", pj(args.init, "omegafold"))
 
+        # create folder to store the weights
         os.makedirs(af_weights_dir, exist_ok=True)
         os.makedirs(of_weights_dir, exist_ok=True)
         os.makedirs(mf_weights_dir, exist_ok=True)
 
-        # Download the alphafold weights
+        # OpenFold will be downloaded automatically
+
+        # Download the AlphaFold weights
         os.system(f"wget -P {af_weights_dir} https://storage.googleapis.com/alphafold/alphafold_params_2022-01-19.tar")
         os.system(
             f"tar --extract --verbose --file={pj(af_weights_dir, 'alphafold_params_2022-01-19.tar')} "
             f"--directory={af_weights_dir} --preserve-permissions"
         )
-        os.system(f"shell rm {pj(af_weights_dir, 'alphafold_params_2022-01-19.tar')}")
+        os.system(f"rm {pj(af_weights_dir, 'alphafold_params_2022-01-19.tar')}")
 
-        # Download the openfold weights
+        # Download the OpenFold weights
         os.system(f"git clone https://huggingface.co/nz/OpenFold {of_weights_dir}")
+        os.system(f"rm -rf {pj(of_weights_dir, '.git')}")
 
-        # Openfold will be downloaded automatically
-
+    # set the arguments for the following
     args.omegafold_script = pj(args.init, "omegafold", "main.py")
     if args.omegafold_weights == "":
         args.omegafold_weights = pj(mf_weights_dir, "omegafold_weights.pt")
@@ -147,37 +172,48 @@ if args.init != "":
     if args.alphafold_weights == "":
         args.alphafold_weights = pj(af_weights_dir, "params_model_*.npz")
 
+# Check if the script to use the AlphaFold weights is provided
 if args.alphafold_weights != "" and args.openfold_script == "":
     error("In order to execute AlphaFold, both the AlphaFold weights and the script of OpenFold must be provided.")
 
+# Check if the script to use the OpenFold weights is provided
 if args.openfold_weights != "" and args.openfold_script == "":
     error("In order to execute OpenFold, both the OpenFold weights and the script of OpenFold must be provided.")
 
+# Check if the OpenFold script is provided, at least one of the weights are provided
 if args.openfold_script != "" and args.alphafold_weights == "" and args.openfold_weights == "":
     error("In order to execute AlphaFold or OpenFold, either the AlphaFold weights or the OpenFold weights must be "
           "provided.")
 
+# Check that either OmegaFold script and weights are provided or both are not provided
 if (args.omegafold_weights != "") != (args.omegafold_script != ""):
     error("In order to execute OmegaFold, both the OmegaFold weights and the script of OmegaFold must be provided.")
 
+# Determine what to execute
 run_alphafold = args.alphafold_weights != "" and args.openfold_script != ""
 run_openfold = args.openfold_weights != "" and args.openfold_script != ""
 run_omegafold = args.omegafold_weights != "" and args.omegafold_script != ""
 
+# Check if anything is provided to execute
 if not any([run_alphafold, run_openfold, run_omegafold]):
     error("Either weights for AlphaFold, OpenFold, or OmegaFold have to be passed.")
 
+# Check if the fasta path is valid
 if not os.path.exists(args.fasta):
     error("Provided FASTA path is neither a file nor a directory.")
 
+# Check if data is provided if necessary
 if (run_alphafold or run_openfold) and args.data == "":
     error("In order to use AlphaFold or OpenFold, you have to provide the path to the datasets.")
 
 os.makedirs(args.output, exist_ok=True)
 if len(os.listdir(args.output)) != 0:
-    # error("Output path is not empty.")
-    pass
+    print("WARNING: Output directory is not empty. Existing data might be overwritten. Continue? [y]/n")
+    char = input()
+    if char not in ["", "y"]:
+        exit(0)
 
+# set up directory structure for folding
 fasta_input = pj(args.output, "fasta")
 alphafold_output = pj(args.output, "alphafold")
 openfold_output = pj(args.output, "openfold")
@@ -194,8 +230,8 @@ if run_omegafold:
     os.makedirs(omegafold_output, exist_ok=True)
 os.makedirs(fold_output, exist_ok=True)
 
-
-if os.path.isfile(args.fasta):
+# copy the fasta file into single sequence fasta files for AlphaFold and OpenFold
+if os.path.isfile(args.fasta) and (run_alphafold or run_openfold):
     seqs = read_fasta(args.fasta)
 
     for head, seq in seqs:
@@ -210,6 +246,7 @@ if os.path.isfile(args.fasta):
             print(head, file=fasta)
             print(seq, file=fasta)
 
+# For multimer folding setup fasta files accordingly
 elif os.path.isdir(args.fasta):
     error("Multimer folding not supported so far.")
     fasta_input = args.fasta
@@ -222,7 +259,9 @@ elif os.path.isdir(args.fasta):
 if run_alphafold or run_openfold:
     specifics = []
     if run_openfold:
+        # Setup OpenFold specific parameters
         if '*' in args.openfold_weights:
+            # Run multiple weight initializations for OpenFold
             for i in range(2, 6):
                 specifics.append(
                     f"--output_dir {ap(openfold_output)} "
@@ -230,13 +269,16 @@ if run_alphafold or run_openfold:
                     f"--output_postfix openfold_model_{i} "
                 )
         else:
+            # Run only a single initialization for AlphaFold
             specifics.append(
                 f"--output_dir {ap(openfold_output)} "
                 f"--openfold_checkpoint_path {ap(args.openfold_weights)} "
                 f"--output_postfix openfold "
             )
     if run_alphafold:
+        # Setup OpenFold specific parameters
         if '*' in args.openfold_weights:
+            # Run multiple weight initializations for AlphaFold
             for i in range(1, 6):
                 specifics.append(
                     f"--output_dir {ap(alphafold_output)} "
@@ -244,6 +286,7 @@ if run_alphafold or run_openfold:
                     f"--output_postfix alphafold_model_{i} "
                 )
         else:
+            # Run only a single initialization for AlphaFold
             specifics.append(
                 f"--output_dir {ap(alphafold_output)} "
                 f"--jax_param_path {ap(args.alphafold_weights)} "
@@ -251,6 +294,7 @@ if run_alphafold or run_openfold:
             )
 
     for output_and_model_parameters in specifics:
+        # Run OpenFold script with folding specific parameters
         cmd = \
             f"python " \
             f"{args.openfold_script} " \
@@ -272,9 +316,11 @@ if run_alphafold or run_openfold:
         # print(cmd)
         os.system(cmd)
 
+        # copy results into one central folder
         os.system(f"cp {pj(output_and_model_parameters.split(' ')[1], 'predictions', '*')} {fold_output}")
 
 if run_omegafold:
+    # Run OmegaFold
     cmd = f"python " \
           f"{args.omegafold_script} " \
           f"{args.fasta if os.path.isfile(args.fasta) else pj(ap(args.output), 'all_sequences.fasta')} " \
@@ -285,7 +331,9 @@ if run_omegafold:
     # print(cmd)
     os.system(cmd)
 
+    # add postfix to result files
     for file in os.listdir(omegafold_output):
         os.system(f"mv {pj(omegafold_output, file)} {pj(omegafold_output, file[:-4] + '_omegafold.pdb')}")
 
+        # copy results into one central folder
     os.system(f"cp {pj(omegafold_output, '*')} {fold_output}")
