@@ -71,7 +71,13 @@ def parse_args() -> Namespace:
         "--omegafold_script",
         type=str,
         default="",
-        help="Path to the pythonscript to execute OmegaFold."
+        help="Path to the pythonscript to execute OmegaFold and AlphaFold."
+    )
+    parser.add_argument(
+        "--esmfold_script",
+        type=str,
+        default="",
+        help="Path to the pythonscript to execute ESMFold."
     )
     parser.add_argument(
         "-a",
@@ -95,6 +101,13 @@ def parse_args() -> Namespace:
         help="Path to the OmegaFold weights to use.",
     )
     parser.add_argument(
+        "-e",
+        "--esmfold",
+        action='store_true',
+        default=False,
+        help="Flag indicating to run ESMFold."
+    )
+    parser.add_argument(
         "-d",
         "--data",
         type=str,
@@ -109,10 +122,10 @@ def parse_args() -> Namespace:
         type=str,
         default="",
         help="Path to empty directory where to store the model scripts and their weights. This command will download "
-             "the OmegaFold github repository, the OpenFold github repository, and the weights for all three models: "
-             "AlphaFold2, OpenFold and OmegaFold. This command will automatically set/overwrite all other optional "
-             "parameters (except for -d and the weights if set) and execute a test run with the specified fasta file.\n"
-             "! Please make sure to have enough memory on your disk for this step !\n"
+             "the OmegaFold github repository, the OpenFold github repository, and the weights for all four models: "
+             "AlphaFold2, OpenFold, OmegaFold, and ESMFold. This command will automatically set/overwrite all other "
+             "optional parameters (except for -d and the weights if set) and execute a test run with the specified "
+             "fasta file.\n! Please make sure to have enough memory on your disk for this step !\n"
              "This can also be used to easily set the optional parameters if the folder structure has been generated "
              "by a previous use of the -i parameter."
     )
@@ -135,6 +148,7 @@ if args.init != "":
         # Clone the repositories for OpenFold and OmegaFold
         # TODO: make this clean in own repo with copied/forked repos to keep everything working in case of later commits
         Repo.clone_from("https://github.com/aqlaboratory/openfold", pj(args.init, "openfold"))
+        os.system(f"pip install {pj(args.init, 'openfold')}/.")
         os.system(
             f"wget "
             f"-P {pj(args.init, 'openfold', 'openfold', 'resources')} "
@@ -142,6 +156,11 @@ if args.init != "":
             f"7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt\""
         )
         Repo.clone_from("https://github.com/HeliXonProtein/OmegaFold.git", pj(args.init, "omegafold"))
+        os.system(
+            f"wget "
+            f"-P {pj(args.init, 'esmfold')} "
+            f"https://raw.githubusercontent.com/facebookresearch/esm/main/scripts/esmfold_inference.py"
+        )
 
         # create folder to store the weights
         os.makedirs(af_weights_dir, exist_ok=True)
@@ -171,6 +190,7 @@ if args.init != "":
         args.openfold_weights = pj(of_weights_dir, "finetuning_*.pt")
     if args.alphafold_weights == "":
         args.alphafold_weights = pj(af_weights_dir, "params_model_*.npz")
+    args.esmfold_script = pj(args.init, "esmfold", "esmfold_inference.py")
 
 # Check if the script to use the AlphaFold weights is provided
 if args.alphafold_weights != "" and args.openfold_script == "":
@@ -193,9 +213,10 @@ if (args.omegafold_weights != "") != (args.omegafold_script != ""):
 run_alphafold = args.alphafold_weights != "" and args.openfold_script != ""
 run_openfold = args.openfold_weights != "" and args.openfold_script != ""
 run_omegafold = args.omegafold_weights != "" and args.omegafold_script != ""
+run_esmfold = args.esmfold_script != "" and args.esmfold_script != ""
 
 # Check if anything is provided to execute
-if not any([run_alphafold, run_openfold, run_omegafold]):
+if not any([run_alphafold, run_openfold, run_omegafold, run_esmfold]):
     error("Either weights for AlphaFold, OpenFold, or OmegaFold have to be passed.")
 
 # Check if the fasta path is valid
@@ -218,6 +239,7 @@ fasta_input = pj(args.output, "fasta")
 alphafold_output = pj(args.output, "alphafold")
 openfold_output = pj(args.output, "openfold")
 omegafold_output = pj(args.output, "omegafold")
+esmfold_output = pj(args.output, "esmfold")
 fold_output = pj(args.output, "folds")
 
 if run_alphafold:
@@ -228,6 +250,8 @@ if run_openfold:
     os.makedirs(fasta_input, exist_ok=True)
 if run_omegafold:
     os.makedirs(omegafold_output, exist_ok=True)
+if run_esmfold:
+    os.makedirs(esmfold_output, exist_ok=True)
 os.makedirs(fold_output, exist_ok=True)
 
 # copy the fasta file into single sequence fasta files for AlphaFold and OpenFold
@@ -335,5 +359,20 @@ if run_omegafold:
     for file in os.listdir(omegafold_output):
         os.system(f"mv {pj(omegafold_output, file)} {pj(omegafold_output, file[:-4] + '_omegafold.pdb')}")
 
-        # copy results into one central folder
+    # copy results into one central folder
+    os.system(f"cp {pj(omegafold_output, '*')} {fold_output}")
+
+if run_esmfold:
+    cmd = f"python " \
+          f"{args.esmfold_script} " \
+          f"-i {args.fasta if os.path.isfile(args.fasta) else pj(ap(args.output), 'all_sequences.fasta')} " \
+          f"-o {esmfold_output} "
+    print(cmd)
+    os.system(cmd)
+
+    # add postfix to result files
+    for file in os.listdir(omegafold_output):
+        os.system(f"mv {pj(omegafold_output, file)} {pj(omegafold_output, file[:-4] + '_esmfold.pdb')}")
+
+    # copy results into one central folder
     os.system(f"cp {pj(omegafold_output, '*')} {fold_output}")
