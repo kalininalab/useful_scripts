@@ -56,4 +56,20 @@ The arguments are as follows:
 * Chain to be extracted
 * Path to the output file to store the chain in
 
+##### mol2pdb.py [Code](mol2pdb.py)
+A file to convert protein sub-structures stored in mol2 files into PDB files. This script is based on work done by 
+Algo Herrera. I just rewrote the data input and the "progress report".
+
+In order to use is, you have to set up a conda environment and install pymol. Assuming you have mamba installed, follow 
+these steps (conda should work equivalently, but I didn't test it).
+
+```shell
+conda create -n pymol python=3.9
+mamba install -c schrodinger -c conda-forge pymol
+```
+
+Then, the arguments are
+* The path to the folder holding the mol2 files
+* The path to the folder to store the pdb files in
+
 https://stackoverflow.com/questions/51187658/markdown-reference-to-section-from-another-file
