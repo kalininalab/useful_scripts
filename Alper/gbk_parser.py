@@ -1,4 +1,5 @@
 from Bio import SeqIO
+import os
 
 class Records:
     """
@@ -100,5 +101,4 @@ def gbk_parser(input_gbk):
     return all_the_records
 
 # Usage example;
-test_results = gbk_parser("./PROKKA_05262023.gbk")
- 
+test_results = gbk_parser(f"{os.path.dirname(os.path.realpath(__file__))}/PROKKA_05262023.gbk")
