@@ -37,4 +37,4 @@ See the [README](Roman/README.md) for detailed explanations
 
 * [GBK Parser](Alper/gbk_parser.py) parse gbk files and store them in list of records class.
 
-See the [Requirements](Alper/requirements.md) for requirement installations
+See the [Requirements](Alper/requirements.md) for required installations
