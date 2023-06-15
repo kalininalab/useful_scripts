@@ -1,3 +1,5 @@
-gbk_parser.py
+# Required packages
 
-biopython
+### gbk_parser.py
+
+* biopython

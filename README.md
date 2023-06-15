@@ -32,3 +32,9 @@ The following scripts I have added:
 * [Crawl PubChem](Roman/pubchem_crawler.py) Download and scan all compounds in the PubChem database
 
 See the [README](Roman/README.md) for detailed explanations
+
+### Alper
+
+* [GBK Parser] (Alper/gbk_parser.py) parse gbk files and store them in list of records class.
+
+See the [Requirements] (Alper/requirements.md) for requirement installations
