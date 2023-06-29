@@ -38,7 +38,15 @@ See the [README](Roman/README.md) for detailed explanations
 * [GBK Parser](Alper/gbk_parser.py) parse gbk files and store them in list of records class.
 
 ### Aldo
-* [Dataset_generator](Aldo/README.md) .
-
+* [Dataset_generator](Aldo/dataset_generator.ipynb) This notebook is designed to format the information
+from binding DB into pandas dataframe. In order to do it employs other useful scripts by its own.
+Those other scripts are:
+  * Computes molecular and chemical descriptor for all ligands in dataset
+  * Download pdb structures from pandas df column within ids.
+  * Clean non-protein molecules from pdb structures
+  * Pdb2fasta (Ilya/pdb_to_fasta.py) is adapted to add fasta sequences innto pandas dataframe
+  * Class balance of dataset within user-tune hyperparameters
+  * Filtering of dataset by enzymatic activity (EC number)
+  * Computes the RMSD and sequences identify of all pdb 3D structures pool.
 
 See the [Requirements](Alper/requirements.md) for required installations
