@@ -11,6 +11,12 @@ source .bashrc
 ##install mamba
 conda install -c conda-forge mamba
 
+##copy rindti repository to your working space
+##clone the repository
+git clone https://github.com/ilsenatorov/rindti
+##enter directory
+cd rindti
+
 ##create the environment
 conda create -n rindti 
 conda activate rindti
@@ -39,3 +45,4 @@ pip install glycowork
 pip install tensorboard
 pip install torchmetrics==0.8.2
 pip install numpy==1.21.5
+pip install . 
