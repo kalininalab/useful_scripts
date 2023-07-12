@@ -1,0 +1,41 @@
+### this file contains the exact commands that I used to install succesfully
+### rindti model from https://rindti.readthedocs.io/en/master/
+
+## if conda is not installed yet
+##install anaconda, more info of this step at: 
+wget https://repo.anaconda.com/archive/Anaconda3-2023.03-1-Linux-x86_64.sh
+bash Anaconda*sh
+cd ~
+source .bashrc
+
+##install mamba
+conda install -c conda-forge mamba
+
+##create the environment
+conda create -n rindti 
+conda activate rindti
+
+##install pytorch
+mamba install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch -c conda-forge
+
+## pytorch lightning and geometric for torch 1.11.0 and cuda 11.3
+pip install torch-scatter==2.0.9 -f https://pytorch-geometric.com/whl/torch-1.11.0+cu113.html
+pip install torch-sparse==0.6.13 -f https://pytorch-geometric.com/whl/torch-1.11.0+cu113.html
+pip install torch-cluster==1.6.0 -f https://pytorch-geometric.com/whl/torch-1.11.0+cu113.html 
+pip install torch_geometric==2.0.4 
+pip install pytorch-lightning==1.6.3 
+
+##other packages
+mamba install -c conda-forge -c bioconda snakemake
+mamba install -c conda-forge rdkit
+mamba install -c conda-forge seaborn
+mamba install -c conda-forge plotly
+pip install future
+pip install fsspec[http]!=2021.06.0
+pip install pyDeprecate==0.3.1
+pip install torchmetrics>=0.4.1
+pip install setuptools==59.5.0
+pip install glycowork
+pip install tensorboard
+pip install torchmetrics==0.8.2
+pip install numpy==1.21.5
