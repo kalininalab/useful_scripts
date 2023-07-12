@@ -38,7 +38,7 @@ See the [README](Roman/README.md) for detailed explanations
 * [GBK Parser](Alper/gbk_parser.py) parse gbk files and store them in list of records class.
 
 ### Aldo
-* [Dataset_generator](Aldo/dataset_generator.ipynb) This notebook is designed to format the information
+* [Dataset_generator](Aldo/data_generator/dataset_generator.ipynb) This notebook is designed to format the information
 from binding DB into pandas dataframe. In order to do it employs other useful scripts by its own.
 Those other scripts are:
   * Computes molecular and chemical descriptor for all ligands in dataset
