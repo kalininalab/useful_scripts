@@ -48,7 +48,7 @@ Those other scripts are:
   * Class balance of dataset within user-tune hyperparameters
   * Filtering of dataset by enzymatic activity (EC number)
   * Computes the RMSD and sequences identify of all pdb 3D structures pool.
-* [Commands for RINDTI installation | jun 2023](Aldo/rindti_installation/rindti_commands_for_installation.txt) This is a txt file that contains the commands that worked for
+* [Commands for RINDTI installation | june 2023](Aldo/rindti_installation/rindti_commands_for_installation.txt) This is a txt file that contains the commands that worked for
 me to succesfully install RINDTI model at June 2023. 
 
 See the [Requirements](Alper/requirements.md) for required installations
