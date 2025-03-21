@@ -36,6 +36,7 @@ See the [README](Roman/README.md) for detailed explanations
 ### Alper
 
 * [GBK Parser](Alper/gbk_parser.py) parse gbk files and store them in list of records class.
+* [QRCodeGenerator](Alper/QRCodeGenerator/) creates qr code without using any online services with user defined colours. Default option is HIPS colour code with transparent background
 
 ### Aldo
 
